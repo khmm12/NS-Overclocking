@@ -1,0 +1,34 @@
+name: build
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+jobs:
+  build:
+    name: lint
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: montudor/action-zip@v1
+        alias: "Bundle OCBundle"
+        with:
+          args: zip -qqrX ../../OCBundle.zip ./
+          working-directory: Sources/OCBundle
+      - uses: montudor/action-zip@v1
+        alias: "Bundle AIO"
+        with:
+          args: zip -qqrX ../../AIO.zip ./
+          working-directory: Sources/AIO
+      - uses: montudor/action-zip@v1
+        alias: "Bundle OC-Suite Configurator"
+        with:
+          args: zip -qqrX "../../OC-Suite Configurator.zip" "./switch/.packages/OC-Suite Configurator" ./switch/.overlays/ovlmenu.ovl
+          working-directory: Sources/OCBundle
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "build: the recent bundle"
+          file_pattern: "./OCBundle.zip ./AIO.zip \"./OC-Suite Configurator.zip\""
+          disable_globbing: true
